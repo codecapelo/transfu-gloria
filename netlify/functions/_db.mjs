@@ -52,6 +52,13 @@ export function json(statusCode, body) {
 }
 
 export function getPeriodBounds(period, referenceDate) {
+  if (period === "all") {
+    return {
+      startDate: "0001-01-01",
+      endDate: "9999-12-31"
+    };
+  }
+
   const base = parseDate(referenceDate);
   const start = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), base.getUTCDate()));
   let end = new Date(start);

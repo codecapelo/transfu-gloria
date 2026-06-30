@@ -26,7 +26,7 @@ export async function handler(event) {
 async function listRecords(event) {
   const sql = getSql();
   const params = event.queryStringParameters || {};
-  const period = params.period || "day";
+  const period = params.period || "all";
   const { startDate, endDate } = getPeriodBounds(period, params.date);
   const type = params.type || "";
   const search = (params.search || "").trim().toLowerCase();
@@ -38,11 +38,9 @@ async function listRecords(event) {
       donation_type,
       blood_type,
       patient_name,
-      clinic_location,
       occurrence_date::text AS occurrence_date,
       occurrence_time::text AS occurrence_time,
       quantity_units,
-      notes,
       created_at::text AS created_at
     FROM transfusion_records
     WHERE occurrence_date >= ${startDate}::date
@@ -52,7 +50,6 @@ async function listRecords(event) {
         ${search} = ''
         OR lower(donor_name) LIKE ${`%${search}%`}
         OR lower(COALESCE(patient_name, '')) LIKE ${`%${search}%`}
-        OR lower(COALESCE(clinic_location, '')) LIKE ${`%${search}%`}
       )
     ORDER BY occurrence_date DESC, occurrence_time DESC, created_at DESC
   `;
@@ -73,11 +70,9 @@ async function createRecord(event) {
       donation_type,
       blood_type,
       patient_name,
-      clinic_location,
       occurrence_date,
       occurrence_time,
-      quantity_units,
-      notes
+      quantity_units
     )
     VALUES (
       ${id},
@@ -85,11 +80,9 @@ async function createRecord(event) {
       ${record.donation_type},
       ${record.blood_type},
       ${record.patient_name},
-      ${record.clinic_location},
       ${record.occurrence_date}::date,
       ${record.occurrence_time}::time,
-      ${record.quantity_units},
-      ${record.notes}
+      ${record.quantity_units}
     )
     RETURNING
       id,
@@ -97,11 +90,9 @@ async function createRecord(event) {
       donation_type,
       blood_type,
       patient_name,
-      clinic_location,
       occurrence_date::text AS occurrence_date,
       occurrence_time::text AS occurrence_time,
       quantity_units,
-      notes,
       created_at::text AS created_at
   `;
 
@@ -138,11 +129,9 @@ function validateRecord(body) {
     donation_type: donationType,
     blood_type: emptyToNull(body.blood_type),
     patient_name: emptyToNull(body.patient_name),
-    clinic_location: emptyToNull(body.clinic_location),
     occurrence_date: occurrenceDate,
     occurrence_time: occurrenceTime,
-    quantity_units: Math.round(quantityUnits),
-    notes: emptyToNull(body.notes)
+    quantity_units: Math.round(quantityUnits)
   };
 }
 

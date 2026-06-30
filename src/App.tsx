@@ -19,7 +19,7 @@ import {
   Users
 } from "lucide-react";
 
-type Period = "day" | "week" | "month";
+type Period = "all" | "day" | "week" | "month";
 type DonationType = "SANGUE" | "PLAQUETAS";
 
 type RecordItem = {
@@ -28,11 +28,9 @@ type RecordItem = {
   donation_type: DonationType;
   blood_type: string | null;
   patient_name: string | null;
-  clinic_location: string | null;
   occurrence_date: string;
   occurrence_time: string;
   quantity_units: number;
-  notes: string | null;
   created_at: string;
 };
 
@@ -49,11 +47,9 @@ type FormState = {
   donation_type: DonationType;
   blood_type: string;
   patient_name: string;
-  clinic_location: string;
   occurrence_date: string;
   occurrence_time: string;
   quantity_units: string;
-  notes: string;
 };
 
 const bloodTypes = ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -65,6 +61,7 @@ const fujisanPhone = "(85) 4009.6612";
 const doubtsPhone = "(85) 4009-6718";
 const doubtsWhatsapp = "(85) 99754-3780";
 const periods: Array<{ value: Period; label: string }> = [
+  { value: "all", label: "Todos" },
   { value: "day", label: "Dia" },
   { value: "week", label: "Semana" },
   { value: "month", label: "Mes" }
@@ -75,18 +72,16 @@ const emptyForm = (): FormState => ({
   donation_type: "SANGUE",
   blood_type: "",
   patient_name: defaultPatientName,
-  clinic_location: "",
   occurrence_date: todayInput(),
   occurrence_time: currentTimeInput(),
-  quantity_units: "1",
-  notes: ""
+  quantity_units: "1"
 });
 
 export default function App() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [donors, setDonors] = useState<DonorSummary[]>([]);
-  const [period, setPeriod] = useState<Period>("day");
+  const [period, setPeriod] = useState<Period>("all");
   const [referenceDate, setReferenceDate] = useState(todayInput());
   const [typeFilter, setTypeFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -202,9 +197,7 @@ export default function App() {
       "Tipo",
       "Tipo sanguineo",
       "Paciente",
-      "Local",
-      "Quantidade",
-      "Observacoes"
+      "Quantidade"
     ];
     const lines = records.map((record) => [
       record.occurrence_date,
@@ -213,9 +206,7 @@ export default function App() {
       record.donation_type,
       record.blood_type || "",
       record.patient_name || "",
-      record.clinic_location || "",
-      String(record.quantity_units),
-      record.notes || ""
+      String(record.quantity_units)
     ]);
     const csv = [header, ...lines].map((row) => row.map(csvCell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -282,69 +273,6 @@ export default function App() {
           </div>
         </div>
 
-        <div className="info-grid">
-          <article className="panel info-panel">
-            <div className="panel-header compact">
-              <div>
-                <p className="section-label">Local da doação</p>
-                <h2>Doação de sangue no Fujisan - Fortaleza - CE</h2>
-              </div>
-              <MapPin size={20} />
-            </div>
-            <ul className="info-list">
-              <li><strong>Banco de sangue:</strong> Fujisan Centro de Hemoterapia e Hematologia do Ceará.</li>
-              <li><strong>Segunda a sexta:</strong> 7:30h às 16:30h.</li>
-              <li><strong>Sábado:</strong> 7:30h às 13:00h.</li>
-              <li><strong>Endereço:</strong> Av. Barão de Studart, 2626 - Joaquim Távora, Fortaleza - CE, 60120-002.</li>
-              <li><strong>Telefone:</strong> {fujisanPhone}</li>
-              <li><strong>Dúvidas:</strong> {doubtsPhone} ou WhatsApp {doubtsWhatsapp}.</li>
-              <li><strong>Instagram:</strong> @fujisanbs</li>
-            </ul>
-            <div className="inline-actions">
-              <a
-                className="secondary-button link-button"
-                href="https://www.google.com/maps/search/?api=1&query=Av.%20Bar%C3%A3o%20de%20Studart%2C%202626%20Joaquim%20T%C3%A1vora%20Fortaleza%20CE"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <ExternalLink size={17} />
-                Abrir mapa
-              </a>
-              <a className="secondary-button link-button" href="tel:+558540096612">
-                <Phone size={17} />
-                Ligar Fujisan
-              </a>
-            </div>
-          </article>
-
-          <article className="panel info-panel">
-            <div className="panel-header compact">
-              <div>
-                <p className="section-label">Antes de doar</p>
-                <h2>Requisitos principais</h2>
-              </div>
-              <ShieldCheck size={20} />
-            </div>
-            <ul className="requirements-list">
-              <li>Esteja alimentado, com refeições leves e não gordurosas nas 4 horas antes da doação.</li>
-              <li>Não tenha ingerido bebida alcoólica nem usado maconha nas últimas 12 horas.</li>
-              <li>Não esteja gripado, resfriado ou em processo alérgico.</li>
-              <li>Não tenha tomado antibiótico nos últimos 15 dias.</li>
-              <li>Tenha repousado bem na noite anterior.</li>
-              <li>Esteja em boas condições de saúde, sem feridas ou machucados no corpo.</li>
-              <li>Pese acima de 50 kg, com desconto das vestimentas.</li>
-              <li>Tenha entre 18 e 69 anos, 11 meses e 29 dias.</li>
-              <li>Doadores de 16 e 17 anos precisam da presença e autorização formal dos pais ou responsável legal.</li>
-              <li>Para primeira doação, o limite de idade é 60 anos.</li>
-              <li>Não tenha se exposto ao risco de contrair AIDS.</li>
-              <li>Não tenha feito tatuagem, piercing ou micropigmentação nos últimos 12 meses.</li>
-              <li>Não tenha diabetes.</li>
-              <li>Não esteja grávida, com suspeita de gestação ou amamentando se o parto ocorreu há menos de 12 meses.</li>
-              <li>Não vá acompanhado de crianças sem acompanhante na hora da doação.</li>
-              <li>Leve documento oficial com foto: RG, carteira profissional, CNH ou equivalente.</li>
-            </ul>
-          </article>
-        </div>
       </section>
 
       <section className="section-heading">
@@ -357,7 +285,7 @@ export default function App() {
 
       <section className="summary-grid" aria-label="Resumo">
         <Metric icon={<CalendarDays />} label="Registros" value={totals.records} />
-        <Metric icon={<Users />} label="Doadores no periodo" value={totals.donors} />
+        <Metric icon={<Users />} label="Doadores exibidos" value={totals.donors} />
         <Metric icon={<Droplets />} label="Sangue" value={totals.blood} />
         <Metric icon={<Droplets />} label="Plaquetas" value={totals.platelets} />
       </section>
@@ -449,25 +377,6 @@ export default function App() {
                 placeholder="Opcional"
               />
             </label>
-
-            <label>
-              Local
-              <input
-                value={form.clinic_location}
-                onChange={(event) => setForm({ ...form, clinic_location: event.target.value })}
-                placeholder="Leito, setor ou unidade"
-              />
-            </label>
-
-            <label className="full">
-              Observacoes
-              <textarea
-                value={form.notes}
-                onChange={(event) => setForm({ ...form, notes: event.target.value })}
-                rows={3}
-                placeholder="Detalhes importantes"
-              />
-            </label>
           </div>
         </form>
 
@@ -504,7 +413,7 @@ export default function App() {
         <div className="panel-header">
           <div>
             <p className="section-label">Consulta</p>
-            <h2>Registros por dia, semana e mes</h2>
+            <h2>Todos os registros salvos</h2>
           </div>
           <div className="toolbar">
             <button type="button" className="icon-button" onClick={() => loadData()} title="Atualizar">
@@ -536,6 +445,7 @@ export default function App() {
             <input
               type="date"
               value={referenceDate}
+              disabled={period === "all"}
               onChange={(event) => setReferenceDate(event.target.value)}
             />
           </label>
@@ -554,7 +464,7 @@ export default function App() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar doador, paciente ou local"
+              placeholder="Buscar doador ou paciente"
             />
             <button type="submit">Buscar</button>
           </form>
@@ -563,7 +473,7 @@ export default function App() {
         <div className="records-list">
           {loading && <p className="empty-state">Carregando registros...</p>}
           {!loading && records.length === 0 && (
-            <p className="empty-state">Nenhum registro neste periodo.</p>
+            <p className="empty-state">Nenhum registro encontrado.</p>
           )}
           {!loading && Object.entries(recordsByDate).map(([date, group]) => (
             <div className="date-group" key={date}>
@@ -579,7 +489,6 @@ export default function App() {
                       <th>Doador</th>
                       <th>Tipo</th>
                       <th>Paciente</th>
-                      <th>Local</th>
                       <th>Qtd.</th>
                       <th></th>
                     </tr>
@@ -594,7 +503,6 @@ export default function App() {
                         </td>
                         <td><Badge type={record.donation_type} /></td>
                         <td>{record.patient_name || "-"}</td>
-                        <td>{record.clinic_location || "-"}</td>
                         <td>{record.quantity_units}</td>
                         <td className="actions-cell">
                           <button
@@ -614,6 +522,77 @@ export default function App() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="section-heading info-heading">
+        <div>
+          <p className="section-label">Informações para doação</p>
+          <h2>Local, contato e requisitos</h2>
+        </div>
+      </section>
+
+      <section className="info-grid">
+        <article className="panel info-panel">
+          <div className="panel-header compact">
+            <div>
+              <p className="section-label">Local da doação</p>
+              <h2>Doação de sangue no Fujisan - Fortaleza - CE</h2>
+            </div>
+            <MapPin size={20} />
+          </div>
+          <ul className="info-list">
+            <li><strong>Banco de sangue:</strong> Fujisan Centro de Hemoterapia e Hematologia do Ceará.</li>
+            <li><strong>Segunda a sexta:</strong> 7:30h às 16:30h.</li>
+            <li><strong>Sábado:</strong> 7:30h às 13:00h.</li>
+            <li><strong>Endereço:</strong> Av. Barão de Studart, 2626 - Joaquim Távora, Fortaleza - CE, 60120-002.</li>
+            <li><strong>Telefone:</strong> {fujisanPhone}</li>
+            <li><strong>Dúvidas:</strong> {doubtsPhone} ou WhatsApp {doubtsWhatsapp}.</li>
+            <li><strong>Instagram:</strong> @fujisanbs</li>
+          </ul>
+          <div className="inline-actions">
+            <a
+              className="secondary-button link-button"
+              href="https://www.google.com/maps/search/?api=1&query=Av.%20Bar%C3%A3o%20de%20Studart%2C%202626%20Joaquim%20T%C3%A1vora%20Fortaleza%20CE"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ExternalLink size={17} />
+              Abrir mapa
+            </a>
+            <a className="secondary-button link-button" href="tel:+558540096612">
+              <Phone size={17} />
+              Ligar Fujisan
+            </a>
+          </div>
+        </article>
+
+        <article className="panel info-panel">
+          <div className="panel-header compact">
+            <div>
+              <p className="section-label">Antes de doar</p>
+              <h2>Requisitos principais</h2>
+            </div>
+            <ShieldCheck size={20} />
+          </div>
+          <ul className="requirements-list">
+            <li>Esteja alimentado, com refeições leves e não gordurosas nas 4 horas antes da doação.</li>
+            <li>Não tenha ingerido bebida alcoólica nem usado maconha nas últimas 12 horas.</li>
+            <li>Não esteja gripado, resfriado ou em processo alérgico.</li>
+            <li>Não tenha tomado antibiótico nos últimos 15 dias.</li>
+            <li>Tenha repousado bem na noite anterior.</li>
+            <li>Esteja em boas condições de saúde, sem feridas ou machucados no corpo.</li>
+            <li>Pese acima de 50 kg, com desconto das vestimentas.</li>
+            <li>Tenha entre 18 e 69 anos, 11 meses e 29 dias.</li>
+            <li>Doadores de 16 e 17 anos precisam da presença e autorização formal dos pais ou responsável legal.</li>
+            <li>Para primeira doação, o limite de idade é 60 anos.</li>
+            <li>Não tenha se exposto ao risco de contrair AIDS.</li>
+            <li>Não tenha feito tatuagem, piercing ou micropigmentação nos últimos 12 meses.</li>
+            <li>Não tenha diabetes.</li>
+            <li>Não esteja grávida, com suspeita de gestação ou amamentando se o parto ocorreu há menos de 12 meses.</li>
+            <li>Não vá acompanhado de crianças sem acompanhante na hora da doação.</li>
+            <li>Leve documento oficial com foto: RG, carteira profissional, CNH ou equivalente.</li>
+          </ul>
+        </article>
       </section>
     </main>
   );

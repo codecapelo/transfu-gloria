@@ -1,6 +1,6 @@
 # Registro de Transfusões
 
-App para registrar doadores de sangue e plaquetas com dia, hora, paciente, local e observações. O painel filtra os registros por dia, semana e mês.
+App para registrar doadores de sangue e plaquetas com dia, hora, paciente e quantidade. O painel mostra todos os registros salvos por padrão e também filtra por dia, semana e mês.
 
 ## Dados cadastrados na tela
 
